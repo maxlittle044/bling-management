@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bling Management Oy</title>
+<meta name="description" content="Bling Management Oy – lyhytaikaismajoituksen hallintapalvelut asuntosijoittajille ja Airbnb-majoittajille.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500&family=Herr+Von+Muellerhoff&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   1. DESIGN TOKENS  (colors sampled from the reference images)
+   ========================================================= */
+:root {
+  --bg: #20242d;              /* slide background */
+  --bg-deep: #1b1e26;
+  --panel: #262a34;           /* modal surface */
+  --text: #e9eaee;
+  --text-soft: #d3d5db;
+  --text-muted: #a3a6ae;
+  --rule: #dbdfe8;            /* thin divider lines */
+  --box-line: #7b7e87;        /* service box border */
+  --gold-1: #ba9f48;
+  --gold-2: #7f6c32;
+  --gold-3: #f5f3ca;
+  --gold: #c9ab5c;
+  --gold-gradient: linear-gradient(90deg, var(--gold-1) 0%, var(--gold-2) 30%, #b7a670 55%, var(--gold-3) 75%, var(--gold-3) 100%);
+  --danger: #ff8a80;
+  --success: #8fd1a8;
+
+  --font-script: "Herr Von Muellerhoff", "Brush Script MT", "Segoe Script", cursive;
+  --font-body: "Alegreya Sans", "Gill Sans", "Segoe UI", Arial, sans-serif;
+
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+  --space-5: 1.5rem; --space-6: 2rem;  --space-7: 3rem;  --space-8: 4.5rem;
+
+  --header-h: 76px;
+  /* Layout stage: everything scales with the viewport like the reference slides,
+     then stops growing at 1600px and centers on very wide screens. */
+  --stage: min(100vw, 1600px);
+  --sv: calc(var(--stage) / 100);
+  --side: calc((100vw - var(--stage)) / 2);
+  --radius-btn: 999px;
+  --radius-panel: 4px;
+  --radius-field: 3px;
+
+  --ease-out: cubic-bezier(.22, .8, .24, 1);
+  --focus-ring: 0 0 0 3px rgba(201, 171, 92, .6);
+
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); -webkit-text-size-adjust: 100%; background: var(--bg); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; height: auto; }
+button, input, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+p { margin: 0; }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute; left: var(--space-4); top: -100px; z-index: 200;
+  background: var(--gold); color: var(--bg); padding: var(--space-2) var(--space-4);
+  border-radius: 4px; text-decoration: none; font-weight: 500;
+}
+.skip-link:focus { top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); }
+
+/* Script headings — the signature lettering from the references */
+.script {
+  font-family: var(--font-script);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: .01em;
+  word-spacing: .18em;
+  white-space: nowrap;
+}
+
+/* Thin full-bleed divider lines */
+.rule { display: block; height: 1px; border: 0; margin: 0; background: var(--rule); opacity: .9; }
+
+/* Bulleted lists inside sections */
+.dot-list { margin: 0; padding-left: 1.95em; list-style: disc; }
+.dot-list li::marker { color: #fff; font-size: .85em; }
+
+/* =========================================================
+   2. BUTTONS
+   ========================================================= */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: 46px; padding: 0 1.5rem;
+  border: 1px solid transparent; border-radius: var(--radius-btn);
+  font-size: 1rem; font-weight: 500; letter-spacing: .02em;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  transition: background-color .3s var(--ease-out), color .3s var(--ease-out),
+              border-color .3s var(--ease-out), transform .3s var(--ease-out);
+}
+.btn:active { transform: translateY(1px); }
+.btn--gold-outline { background: transparent; color: var(--gold-3); border-color: var(--gold); }
+.btn--gold-outline:hover { background: var(--gold); color: var(--bg); }
+.btn--gold { background: var(--gold); color: var(--bg); }
+.btn--gold:hover { background: var(--gold-3); }
+.btn[disabled] { opacity: .7; cursor: progress; }
+
+/* =========================================================
+   3. HEADER & NAVIGATION
+   ========================================================= */
+.site-header {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
+  transition: background-color .4s var(--ease-out), box-shadow .4s var(--ease-out);
+}
+.site-header.is-scrolled {
+  background: rgba(32, 36, 45, .82);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  backdrop-filter: saturate(140%) blur(14px);
+  box-shadow: 0 1px 0 rgba(219, 223, 232, .14);
+}
+.site-header__inner {
+  height: var(--header-h);
+  padding-inline: max(1.25rem, calc(var(--side) + 2.4 * var(--sv)));
+  display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: var(--space-4);
+}
+/* Logo (left) and booking button (right) always share one row */
+.logo {
+  flex: 0 1 auto; min-width: 0;
+  font-family: var(--font-script); font-size: clamp(1.6rem, 1.1rem + 1.9vw, 2.5rem); line-height: 1;
+  color: #fff; text-decoration: none; white-space: nowrap;
+  padding: .3em .15em .1em;
+  transition: opacity .3s var(--ease-out);
+}
+.logo:hover { opacity: .8; }
+.logo img { height: 44px; width: auto; } /* used once a real logo file is supplied */
+
+.site-nav { display: flex; flex: 0 0 auto; align-items: center; gap: var(--space-6); margin-left: auto; }
+.btn__short { display: none; }
+
+/* =========================================================
+   4. MAIN PAGE SECTIONS
+   ========================================================= */
+main { position: relative; }
+.section { position: relative; isolation: isolate; overflow: hidden; }
+
+/* ---- 4.1 Hero / intro (reference image 1) ---- */
+.hero {
+  padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  padding-bottom: max(4rem, calc(8 * var(--sv)));
+}
+.hero::before { /* soft ambient light behind the signature */
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  left: 50%; top: 4%; width: min(1100px, 90vw); aspect-ratio: 2.4;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,.045), transparent 65%);
+}
+.hero__title {
+  font-size: max(3.4rem, calc(15.6 * var(--sv)));
+  padding: 0 0 0 calc(var(--side) + 1.6 * var(--sv));
+  margin-top: max(.75rem, calc(1.6 * var(--sv)));
+  line-height: 1.15;
+}
+.hero__rule { margin-left: calc(var(--side) + 2 * var(--sv)); margin-top: max(.5rem, calc(1.6 * var(--sv))); }
+.hero__body {
+  padding: max(1.5rem, calc(2.6 * var(--sv))) calc(var(--side) + 5.6 * var(--sv)) 0;
+  max-width: calc(var(--side) + 95 * var(--sv));
+  font-size: max(1.05rem, calc(1.58 * var(--sv)));
+  font-weight: 300;
+  color: var(--text-soft);
+  line-height: 1.3;
+}
+.hero__body p + p, .hero__body p + .services-block, .hero__body .services-block + p { margin-top: 1.3em; }
+.hero__body .dot-list { padding-left: 1.85em; }
+
+/* ---- 4.2 & 4.3 Service sections (reference images 2 & 3) ---- */
+.service { padding-bottom: clamp(4rem, 6vw, 6rem); }
+.service__head {
+  min-height: max(9rem, calc(22 * var(--sv)));
+  display: flex; align-items: flex-end;
+  padding: calc(var(--header-h) * .6) 0 max(1.5rem, calc(4.6 * var(--sv))) calc(var(--side) + 7.2 * var(--sv));
+}
+.service__title { font-size: max(3rem, calc(9.4 * var(--sv))); line-height: 1.1; }
+.service__box {
+  margin: 0 calc(var(--side) + 5.6 * var(--sv));
+  border: 1px solid var(--box-line);
+  border-top: 0;
+  padding: max(1.75rem, calc(4.8 * var(--sv))) max(1.25rem, calc(4.8 * var(--sv))) max(2rem, calc(3.8 * var(--sv)));
+  font-size: max(1rem, calc(1.33 * var(--sv)));
+  font-weight: 300;
+  color: var(--text-soft);
+  line-height: 1.22;
+  background: linear-gradient(180deg, rgba(255,255,255,.012), transparent 40%);
+}
+.service--profile .service__box { padding-left: max(1.25rem, calc(5.9 * var(--sv))); }
+.service__box > p + p, .service__box > .dot-list + p { margin-top: 1.22em; }
+.service__box .dot-list { margin-top: .05em; padding-left: 1.6em; }
+.service__box .dot-list li + li { margin-top: .05em; }
+
+/* ---- 4.4 Testimonials (reference image 4) ---- */
+.reviews { padding: calc(var(--header-h) * .4) 0 clamp(3rem, 5vw, 5rem); }
+.reviews__orb { /* slow-drifting warm light behind the frames */
+  position: absolute; z-index: -1; pointer-events: none;
+  width: clamp(320px, 46vw, 680px); aspect-ratio: 1; border-radius: 50%;
+  right: 6%; top: 18%;
+  background: radial-gradient(circle, rgba(201,171,92,.07) 0%, rgba(201,171,92,.035) 35%, transparent 70%);
+  filter: blur(40px);
+}
+.reviews__canvas {
+  position: relative; width: 100%; max-width: 1600px; margin: 0 auto;
+  container-type: inline-size;
+}
+.reviews__eyebrow, .reviews__sub { font-weight: 300; color: var(--text-soft); margin: 0; }
+.reviews__title { font-size: 11cqw; line-height: 1.1; }
+
+.quote {
+  position: relative; margin: 0;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  border: 2px solid transparent;
+  border-image: var(--gold-gradient) 1;
+  outline: 1px solid rgba(186, 159, 72, .28);
+  outline-offset: 1px;
+  color: #fff; font-weight: 400;
+  transition: box-shadow .5s var(--ease-out), transform .5s var(--ease-out);
+}
+.quote:hover { box-shadow: 0 0 40px -8px rgba(201,171,92,.28); }
+blockquote { margin: 0; }
+.quote p { margin: 0; }
+
+/* Desktop: free-form arrangement matching the reference slide */
+@media (min-width: 1200px) {
+  .reviews__canvas { aspect-ratio: 1366 / 690; }
+  .reviews__head > *, .reviews__grid > * { position: absolute; }
+  .reviews__eyebrow { left: 8.86%; top: 0;      font-size: 1.32cqw; }
+  .reviews__title   { left: 8.6%;  top: 3.2%; }
+  .reviews__sub     { left: 32.6%; top: 23.5%;  font-size: 1.32cqw; }
+  .quote { font-size: 1.2cqw; line-height: 1.33; padding: 0 1cqw; }
+  .quote p { max-width: var(--qw); }
+  .quote--a { left: 48.46%; top: 4.2%;  width: 22.2%; height: 30.1%; --qw: 15.4cqw; }
+  .quote--b { left: 77.38%; top: 0.7%;  width: 13.5%; height: 39.3%; --qw: 7.6cqw; }
+  .quote--c { left: 11.35%; top: 38.6%; width: 15.1%; height: 43.8%; --qw: 10cqw; }
+  .quote--d { left: 35.14%; top: 48.8%; width: 22%;   height: 30.1%; --qw: 14.9cqw; }
+  .quote--e { left: 67.57%; top: 52.3%; width: 22.1%; height: 30%;   --qw: 16.6cqw; }
+}
+
+/* Tablet & mobile: readable stacked arrangement */
+@media (max-width: 1199.98px) {
+  .reviews__canvas { padding: 0 max(1.25rem, 5.6vw); }
+  .quote p { max-width: 36ch; }
+  .reviews__head { display: grid; justify-items: start; margin-bottom: var(--space-7); }
+  .reviews__title { font-size: clamp(4rem, 17vw, 7.5rem); padding-left: .1em; }
+  .reviews__sub { margin: -.25rem 0 0 min(40%, 18rem); }
+  .reviews__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); }
+  .quote { min-height: 210px; padding: var(--space-6) var(--space-5); font-size: 1.05rem; line-height: 1.4; }
+  .quote:last-child:nth-child(odd) { grid-column: 1 / -1; width: calc(50% - var(--space-6) / 2); justify-self: center; }
+}
+@media (max-width: 600px) {
+  .reviews__grid { grid-template-columns: 1fr; gap: var(--space-5); }
+  .quote { min-height: 170px; }
+  .quote:last-child:nth-child(odd) { width: auto; }
+}
+/* On desktop the wrapper elements step out of the way so each
+   quote is positioned directly inside the canvas */
+@media (min-width: 1200px) { .reviews__head, .reviews__grid { display: contents; } }
+
+/* ---- 4.5 Contact (reference image 5) ---- */
+.contact { padding-bottom: clamp(5rem, 11vw, 10rem); }
+.contact__head {
+  min-height: max(10rem, calc(29.6 * var(--sv)));
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--header-h) * .5) 1rem clamp(1rem, 3vw, 3rem);
+}
+.contact__title { font-size: max(3rem, calc(10.7 * var(--sv))); line-height: 1.15; transform: translateX(1.5%); }
+.contact__body { text-align: center; padding-top: max(3rem, calc(6.6 * var(--sv))); }
+.contact__heading {
+  margin: 0 0 .9rem; font-weight: 400; color: #fff;
+  font-size: max(1.35rem, calc(1.85 * var(--sv))); letter-spacing: .03em;
+}
+.contact__list { list-style: none; margin: 0; padding: 0; font-size: max(1.05rem, calc(1.3 * var(--sv))); font-weight: 300; color: var(--text-soft); line-height: 1.6; }
+.contact__list a { text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .3s, color .3s; }
+.contact__list a:hover { color: var(--gold-3); border-color: var(--gold); }
+
+/* =========================================================
+   5. APPOINTMENT MODAL
+   ========================================================= */
+.modal {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px)) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  visibility: hidden; pointer-events: none;
+}
+.modal.is-open { visibility: visible; pointer-events: auto; }
+.modal__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(14, 16, 21, .72);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  opacity: 0; transition: opacity .35s var(--ease-out);
+}
+.modal.is-open .modal__backdrop { opacity: 1; }
+
+.modal__dialog {
+  position: relative; width: 100%; max-width: 640px;
+  max-height: 100%; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--panel); color: var(--text);
+  border: 1px solid transparent;
+  border-image: var(--gold-gradient) 1;
+  box-shadow: 0 30px 90px -20px rgba(0, 0, 0, .7);
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  opacity: 0; transform: translateY(18px) scale(.98);
+  transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);
+}
+.modal.is-open .modal__dialog { opacity: 1; transform: none; }
+
+.modal__close {
+  position: absolute; top: var(--space-4); right: var(--space-4);
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: transparent; border: 1px solid rgba(219,223,232,.25); cursor: pointer; color: var(--text);
+  transition: background-color .25s, border-color .25s;
+}
+.modal__close:hover { background: rgba(255,255,255,.06); border-color: var(--gold); }
+.modal__close svg { width: 18px; height: 18px; }
+
+.modal__title {
+  font-family: var(--font-script); font-weight: 400; color: #fff;
+  font-size: clamp(2.6rem, 7vw, 3.6rem); line-height: 1.2;
+  margin: 0 3rem .25rem 0;
+}
+.modal__intro { margin: 0 0 var(--space-6); color: var(--text-muted); font-size: 1rem; font-weight: 300; max-width: 46ch; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4) var(--space-4); }
+.field { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.field--full { grid-column: 1 / -1; }
+.field label { font-size: .95rem; font-weight: 500; color: var(--text); }
+.field .req { color: var(--gold); margin-left: 2px; }
+.field .optional { font-weight: 300; color: var(--text-muted); }
+
+.field input, .field textarea {
+  width: 100%; min-height: 48px;
+  padding: .7rem .9rem;
+  border: 1px solid #4a4f5b; border-radius: var(--radius-field);
+  background: var(--bg-deep); color: var(--text);
+  font-size: 1rem; /* 16px prevents iOS zoom */
+  color-scheme: dark;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none; appearance: none;
+}
+.field textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+.field input::placeholder, .field textarea::placeholder { color: #7f838d; }
+.field input:hover, .field textarea:hover { border-color: #6a707d; }
+.field input:focus-visible, .field textarea:focus-visible { border-color: var(--gold); box-shadow: var(--focus-ring); }
+.field.has-error input, .field.has-error textarea { border-color: var(--danger); }
+.field.has-error input:focus-visible { box-shadow: 0 0 0 3px rgba(255, 138, 128, .25); }
+.field__error { min-height: 1.2em; font-size: .88rem; color: var(--danger); margin: 0; }
+
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-5); }
+.form-actions .btn { min-width: 190px; }
+.form-note { font-size: .9rem; color: var(--text-muted); margin: 0; flex: 1 1 200px; }
+
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid currentColor; border-right-color: transparent;
+  animation: spin .8s linear infinite; display: none;
+}
+.btn.is-loading .spinner { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.booking-success { display: none; text-align: center; padding: var(--space-5) 0 var(--space-2); }
+.booking-success.is-visible { display: block; }
+.booking-success__icon {
+  width: 64px; height: 64px; margin: 0 auto var(--space-5); border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid var(--gold); color: var(--gold-3);
+}
+.booking-success__icon svg { width: 28px; height: 28px; }
+.booking-success h3 { font-family: var(--font-script); font-weight: 400; font-size: 3rem; line-height: 1.2; margin: 0 0 var(--space-3); color: #fff; }
+.booking-success p { margin: 0 auto var(--space-3); max-width: 42ch; color: var(--text-muted); font-weight: 300; }
+.booking-success .summary { color: var(--text); font-weight: 400; }
+.booking-success .btn { margin-top: var(--space-4); }
+
+body.modal-open { overflow: hidden; }
+
+/* =========================================================
+   6. SCROLL ANIMATION INFRASTRUCTURE
+   data-reveal              → fade + rise
+   data-reveal="fade"       → fade only
+   data-reveal="write"      → script heading draws in left→right
+   data-reveal-stagger      → on a parent; children reveal in sequence
+   data-parallax="0.15"     → background element drifts on scroll
+   ========================================================= */
+.js [data-reveal] {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .9s var(--ease-out), transform .9s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.js [data-reveal="fade"] { transform: none; }
+.js [data-reveal].is-visible { opacity: 1; transform: none; }
+
+/* Handwriting reveal: the clip extends beyond the box so long
+   flourishes on the script letters are never cut off. */
+.js [data-reveal="write"] { opacity: 1; transform: none; }
+.ink { display: inline-block; }
+.js [data-reveal="write"] .ink {
+  -webkit-clip-path: inset(-40% 100% -40% -10%);
+  clip-path: inset(-40% 100% -40% -10%);
+  transition: clip-path 2.2s cubic-bezier(.45, .1, .25, 1), -webkit-clip-path 2.2s cubic-bezier(.45, .1, .25, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.js [data-reveal="write"].is-visible .ink { -webkit-clip-path: inset(-40% -10% -40% -10%); clip-path: inset(-40% -10% -40% -10%); }
+.js [data-reveal="write"].is-done .ink { -webkit-clip-path: none; clip-path: none; }
+.contact__title[data-reveal="write"] { transform: translateX(1.5%); }
+
+/* Divider lines draw outward */
+.js .rule[data-reveal] { opacity: 1; transform: scaleX(0); transform-origin: left center; transition: transform 1.4s var(--ease-out); }
+.js .rule[data-reveal].is-visible { transform: scaleX(1); }
+
+/* =========================================================
+   7. RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  :root { --header-h: 68px; }
+  .hero__title { padding-left: 3vw; }
+  .service__head { padding-left: 6%; }
+}
+@media (max-width: 600px) {
+  .site-header .btn { min-height: 42px; padding: 0 1.1rem; font-size: .95rem; }
+  .btn__full { display: none; }
+  .btn__short { display: inline; }
+  .hero { min-height: 0; }
+  .hero__title { white-space: normal; font-size: 21vw; line-height: 1; padding: .25em 0 .1em 4vw; }
+  .hero__title .ink { display: block; }
+  .hero__title .ink > span { display: block; }
+  .hero__title .ink > span + span { padding-left: 14vw; margin-top: -.12em; }
+  .hero__body, .service__box { font-size: 1.05rem; }
+  .service__title, .contact__title { font-size: 14.5vw; }
+  .service__title { white-space: normal; }
+  .service__box { margin: 0 4%; }
+  .contact__title { white-space: normal; text-align: center; line-height: 1; }
+  .form-grid { grid-template-columns: 1fr; gap: var(--space-2); }
+  .modal { align-items: flex-end; padding: 0; }
+  .modal__dialog {
+    max-width: none; max-height: 92%;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    transform: translateY(40px);
+  }
+  .form-actions .btn { width: 100%; }
+}
+
+/* =========================================================
+   8. REDUCED MOTION
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .js [data-reveal], .js .rule[data-reveal] { opacity: 1; transform: none; }
+  .js [data-reveal="write"] .ink { -webkit-clip-path: none; clip-path: none; }
+  [data-parallax] { transform: none !important; }
+}
+</style>
+</head>
+
+<body>
+<a class="skip-link" href="#main">Siirry sisältöön</a>
+
+<!-- =========================================================
+     HEADER & NAVIGATION
+     To use a real logo file, replace the text inside .logo with:
+     <img src="assets/bling-logo.png" alt="Bling Management">
+     ========================================================= -->
+<header class="site-header" id="siteHeader">
+  <div class="site-header__inner">
+    <a href="#top" class="logo" aria-label="Bling Management, etusivu">Bling Management</a>
+    <nav class="site-nav" aria-label="Päävalikko">
+      <button type="button" class="btn btn--gold-outline" lang="en" data-open-booking aria-haspopup="dialog" aria-controls="bookingModal">
+        <span class="btn__full">Book an Appointment</span>
+        <span class="btn__short">Book now</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- =======================================================
+       SECTION 1 — Intro (reference image 1)
+       ======================================================= -->
+  <section class="section hero" id="top" aria-labelledby="heroTitle">
+    <h1 class="script hero__title" id="heroTitle" data-reveal="write"><span class="ink"><span>Bling</span> <span>Management</span></span></h1>
+    <hr class="rule hero__rule" data-reveal style="--reveal-delay:.6s">
+
+    <div class="hero__body" data-reveal style="--reveal-delay:.9s">
+      <p>Bling Management Oy on asuntosijoittajien ja Airbnb-majoittajien luotettava operatiivinen kumppani. Yritys tarjoaa kokonaisvaltaisia ja räätälöityjä lyhytaikaismajoituksen hallintapalveluita, jotka helpottavat majoitustoiminnan arkea ja parantavat tuottavuutta.</p>
+
+      <div class="services-block">
+        <p>Palveluihimme kuuluu muun muassa:</p>
+        <ul class="dot-list">
+          <li>majoituskohteiden optimointi houkuttelevuuden ja tuoton parantamiseksi</li>
+          <li>asiakaspalvelu suomeksi ja englanniksi 7 päivää viikossa</li>
+          <li>varausten ja viestinnän hallinta OTA-kanavien kautta</li>
+          <li>kohteiden operatiivinen ylläpito ja toiminnan sujuvuuden varmistaminen</li>
+        </ul>
+      </div>
+
+      <p>Palvelut räätälöidään aina asiakkaan tarpeiden mukaan – yhdestä asunnosta laajempiin asuntoportfolioihin.<br>
+      Tavoitteemme on tehdä majoittamisesta omistajalle helppoa, kannattavaa ja stressitöntä.</p>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       SECTION 2 — Asiakaspalvelu (reference image 2)
+       ======================================================= -->
+  <section class="section service" id="asiakaspalvelu" aria-labelledby="svcTitle1">
+    <div class="service__head">
+      <h2 class="script service__title" id="svcTitle1" data-reveal="write"><span class="ink">Asiakaspalvelu</span></h2>
+    </div>
+    <hr class="rule" data-reveal>
+    <div class="service__box" data-reveal style="--reveal-delay:.25s">
+      <p>Asiakaspalvelu – kuukausipalvelu</p>
+
+      <p>Sisältö:</p>
+      <ul class="dot-list">
+        <li>Jatkuva keskusteluyhteys asukkaaseen puhelimitse ja OTA-kanavan kautta.</li>
+        <li>Vieraiden kanssa kommunikointi 7 päivää viikossa lähtökohtaisesti klo 05.00–23.00, mutta hätä- ja poikkeustilanteissa 24/7.</li>
+        <li>Vieraiden avustaminen sisään- ja uloskirjautumisessa.</li>
+        <li>Apua kodinkoneiden ja kodin elektroniikkalaitteiden käyttämiseen.</li>
+        <li>Asiakkaiden neuvominen, tuki ja palautteen vastaanottaminen, sekä puutteiden korjaaminen majoituksen aikana.</li>
+        <li>Mahdollisuus neuvotella lisäpalveluista: tekstiilien tilaus, siivoojien koordinointi</li>
+      </ul>
+
+      <p>Hinnoittelu:</p>
+      <ul class="dot-list">
+        <li>Perusasunto (1 kohde): 120 € / asunto / kk + hallinninointii liittyvät palvelumaksut</li>
+        <li>Useampi asunto (+3 kohde): 100 € / asunto / kk + hallinnointiin liittyvät palvelumaksut</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       SECTION 3 — Profiilin optimointi (reference image 3)
+       ======================================================= -->
+  <section class="section service service--profile" id="profiilin-optimointi" aria-labelledby="svcTitle2">
+    <div class="service__head">
+      <h2 class="script service__title" id="svcTitle2" data-reveal="write"><span class="ink">Profiilin optimointi</span></h2>
+    </div>
+    <hr class="rule" data-reveal>
+    <div class="service__box" data-reveal style="--reveal-delay:.25s">
+      <p>Majoitusprofiilin optimointi – kertaluonteinen projekti</p>
+
+      <p>Sisältö:</p>
+      <ul class="dot-list">
+        <li>Ammattimainen ja myyvä ilmoituksen kuvaus (otsikko, kuvaustekstit, kuvien läpikäynti ja kuvatekstit)</li>
+        <li>Automatisoitujen viestipohjien luominen (sisäänkirjautumisohjeet, aikaiset sisäänkirjautumispyynnöt, myöhäiset uloskirjautumispyynnöt, pysäköintiohjeet, tervetulo- ja kiitosviestit)</li>
+        <li>Saapumis- ja lähtemisohjeet. Kuinka asiakas voi saapua majoituskohteelle helpoiten, esim. lentoasemalta?</li>
+        <li>Majoituskohteen ympäristön kuvaus. Käyn läpi mitä ympäristössä sijaitsee, ja mitä aktiviteetteja/tekemistä asiakkaalle löytyy?</li>
+        <li>Muut valmiit viestipohjat tarpeen mukaan (muistutukset, lisäohjeet, sääntöviestit)</li>
+      </ul>
+
+      <p>Hinnoittelu:</p>
+      <ul class="dot-list">
+        <li>Perushinta: € / projekti</li>
+        <li>Laajennettu versio (esim. 2+ asuntoa tai paljon viestipohjia): € / projekti</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       SECTION 4 — Palautteita / testimonials (reference image 4)
+       ======================================================= -->
+  <section class="section reviews" id="palautteita" aria-labelledby="reviewsTitle">
+    <div class="reviews__orb" data-parallax="0.12" aria-hidden="true"></div>
+
+    <div class="reviews__canvas">
+      <div class="reviews__head">
+        <p class="reviews__eyebrow" data-reveal="fade">Aitoja</p>
+        <h2 class="script reviews__title" id="reviewsTitle" data-reveal="write"><span class="ink">Palautteita</span></h2>
+        <p class="reviews__sub" data-reveal="fade" style="--reveal-delay:1.2s">aidoilta asiakkailta</p>
+      </div>
+
+      <div class="reviews__grid">
+        <figure class="quote quote--a" data-reveal style="--reveal-delay:.2s">
+          <blockquote lang="fi"><p>“Majoitus vastasi kaikkia tarpeita ja kommunikointi oli vastavuoroista ja ystävällistä. Sisäänkirjautumisohjeet oli laadukkaat ja selkeät.“</p></blockquote>
+        </figure>
+        <figure class="quote quote--b" data-reveal style="--reveal-delay:.35s">
+          <blockquote lang="en"><p>“The host was very kind and ready to support if we need something“</p></blockquote>
+        </figure>
+        <figure class="quote quote--c" data-reveal style="--reveal-delay:.5s">
+          <blockquote lang="en"><p>“I liked the way the host communicated with us and I have to say that making a short video on how to access the property is genius!“</p></blockquote>
+        </figure>
+        <figure class="quote quote--d" data-reveal style="--reveal-delay:.65s">
+          <blockquote lang="en"><p>“The host was excellent and provided us with clear instructions and assistance.“</p></blockquote>
+        </figure>
+        <figure class="quote quote--e" data-reveal style="--reveal-delay:.8s">
+          <blockquote lang="en"><p>“The host was so lovely and kind. She allowed us to drop off the luggage while we waiting for the check in time.“</p></blockquote>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       SECTION 5 — Yhteystiedot / contact (reference image 5)
+       ======================================================= -->
+  <section class="section contact" id="yhteystiedot" aria-labelledby="contactHeading">
+    <div class="contact__head">
+      <p class="script contact__title" aria-hidden="true" data-reveal="write"><span class="ink">Bling Management</span></p>
+    </div>
+    <hr class="rule" data-reveal>
+    <div class="contact__body" data-reveal style="--reveal-delay:.3s">
+      <h2 class="contact__heading" id="contactHeading">YHTEISTIEDOT</h2>
+      <ul class="contact__list">
+        <li>Matilda Pohjola</li>
+        <li><a href="tel:+358440888162">+358 440 888 162</a></li>
+        <li>Bling Management Oy</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<!-- =========================================================
+     APPOINTMENT MODAL
+     ========================================================= -->
+<div class="modal" id="bookingModal" aria-hidden="true" lang="en">
+  <div class="modal__backdrop" data-close-booking></div>
+
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="bookingTitle" aria-describedby="bookingIntro" tabindex="-1">
+    <button type="button" class="modal__close" data-close-booking aria-label="Close booking form">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div id="bookingFormWrap">
+      <h2 class="modal__title" id="bookingTitle">Book an appointment</h2>
+      <p class="modal__intro" id="bookingIntro">Tell us when suits you and we'll confirm your appointment.</p>
+
+      <form id="bookingForm" novalidate>
+        <div class="form-grid">
+          <div class="field field--full">
+            <label for="bkName">Full name<span class="req" aria-hidden="true">*</span></label>
+            <input id="bkName" name="name" type="text" autocomplete="name" placeholder="Jane Doe" required aria-describedby="bkNameErr">
+            <p class="field__error" id="bkNameErr" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="bkEmail">Email address<span class="req" aria-hidden="true">*</span></label>
+            <input id="bkEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="jane@example.com" required aria-describedby="bkEmailErr">
+            <p class="field__error" id="bkEmailErr" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="bkPhone">Phone number<span class="req" aria-hidden="true">*</span></label>
+            <input id="bkPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+358 40 123 4567" required aria-describedby="bkPhoneErr">
+            <p class="field__error" id="bkPhoneErr" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="bkDate">Preferred date<span class="req" aria-hidden="true">*</span></label>
+            <input id="bkDate" name="date" type="date" required aria-describedby="bkDateErr">
+            <p class="field__error" id="bkDateErr" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="bkTime">Preferred time<span class="req" aria-hidden="true">*</span></label>
+            <input id="bkTime" name="time" type="time" required aria-describedby="bkTimeErr">
+            <p class="field__error" id="bkTimeErr" aria-live="polite"></p>
+          </div>
+
+          <div class="field field--full">
+            <label for="bkMessage">Message <span class="optional">(optional)</span></label>
+            <textarea id="bkMessage" name="message" maxlength="1000" placeholder="Anything we should know before your appointment?"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--gold" id="bkSubmit">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn__label">Submit booking</span>
+          </button>
+          <p class="form-note">Fields marked * are required.</p>
+        </div>
+      </form>
+    </div>
+
+    <div class="booking-success" id="bookingSuccess" role="status" aria-live="polite" tabindex="-1">
+      <div class="booking-success__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <h3>Details checked</h3>
+      <p class="summary" id="bookingSummary"></p>
+      <p>This is a demo form: your request has not been sent or saved. Connect a booking service or backend to receive real appointments.</p>
+      <button type="button" class="btn btn--gold" data-close-booking>Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   SETUP
+   ========================================================= */
+document.documentElement.classList.add('js');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/* =========================================================
+   HEADER — background appears on scroll
+   ========================================================= */
+(function headerScroll() {
+  const header = document.getElementById('siteHeader');
+  const update = () => header.classList.toggle('is-scrolled', window.scrollY > 12);
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+})();
+
+/* =========================================================
+   SCROLL ANIMATIONS — reveal, stagger, handwriting
+   ========================================================= */
+(function scrollReveal() {
+  document.querySelectorAll('[data-reveal-stagger]').forEach(group => {
+    const step = parseFloat(group.dataset.revealStagger) || 0.12;
+    [...group.children].forEach((child, i) => {
+      if (!child.hasAttribute('data-reveal')) child.setAttribute('data-reveal', '');
+      child.style.setProperty('--reveal-delay', (i * step) + 's');
+    });
+  });
+
+  const items = document.querySelectorAll('[data-reveal]');
+  const finishWrite = el => {
+    if (el.dataset.reveal !== 'write') return;
+    // Drop the clip once drawn so flourishes are never trimmed on resize
+    const ink = el.querySelector('.ink') || el;
+    ink.addEventListener('transitionend', () => el.classList.add('is-done'), { once: true });
+  };
+
+  if (prefersReducedMotion.matches || !('IntersectionObserver' in window)) {
+    items.forEach(el => el.classList.add('is-visible', 'is-done'));
+    return;
+  }
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        finishWrite(entry.target);
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+  items.forEach(el => io.observe(el));
+})();
+
+/* =========================================================
+   BACKGROUND EFFECTS — gentle parallax
+   ========================================================= */
+(function parallax() {
+  const els = [...document.querySelectorAll('[data-parallax]')];
+  if (!els.length || prefersReducedMotion.matches) return;
+  let ticking = false;
+  const render = () => {
+    const vh = window.innerHeight;
+    els.forEach(el => {
+      const speed = parseFloat(el.dataset.parallax) || 0.1;
+      const rect = el.parentElement.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > vh) return;
+      const offset = (rect.top + rect.height / 2 - vh / 2) * speed;
+      el.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+    });
+    ticking = false;
+  };
+  const onScroll = () => { if (!ticking) { requestAnimationFrame(render); ticking = true; } };
+  render();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+})();
+
+/* =========================================================
+   APPOINTMENT MODAL — open / close / focus trap
+   ========================================================= */
+const Booking = (function () {
+  const modal = document.getElementById('bookingModal');
+  const dialog = modal.querySelector('.modal__dialog');
+  const form = document.getElementById('bookingForm');
+  const formWrap = document.getElementById('bookingFormWrap');
+  const success = document.getElementById('bookingSuccess');
+  let lastFocused = null;
+  let scrollY = 0;
+
+  const focusables = () => [...dialog.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter(el => el.offsetParent !== null);
+
+  function lockScroll() {
+    scrollY = window.scrollY;
+    const sbw = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.paddingRight = sbw ? sbw + 'px' : '';
+    document.body.classList.add('modal-open');
+  }
+  function unlockScroll() {
+    document.body.classList.remove('modal-open');
+    document.body.style.paddingRight = '';
+    window.scrollTo(0, scrollY);
+  }
+
+  function open(trigger) {
+    if (modal.classList.contains('is-open')) return;
+    lastFocused = trigger || document.activeElement;
+    resetForm();
+    BookingForm.refreshMinimums();
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    lockScroll();
+    setTimeout(() => document.getElementById('bkName').focus(), 60);
+  }
+
+  function close() {
+    if (!modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    unlockScroll();
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+  }
+
+  function resetForm() {
+    form.reset();
+    BookingForm.clearErrors();
+    formWrap.hidden = false;
+    success.classList.remove('is-visible');
+  }
+
+  function showSuccess(summary) {
+    document.getElementById('bookingSummary').textContent = summary;
+    formWrap.hidden = true;
+    success.classList.add('is-visible');
+    success.focus();
+  }
+
+  document.addEventListener('click', e => {
+    const openBtn = e.target.closest('[data-open-booking]');
+    if (openBtn) { e.preventDefault(); open(openBtn); return; }
+    if (e.target.closest('[data-close-booking]')) close();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!modal.classList.contains('is-open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key === 'Tab') {
+      const f = focusables();
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    }
+  });
+
+  return { open, close, showSuccess };
+})();
+
+/* =========================================================
+   FORM VALIDATION & SUBMISSION
+   ========================================================= */
+const BookingForm = (function () {
+  const form = document.getElementById('bookingForm');
+  const f = {
+    name: document.getElementById('bkName'),
+    email: document.getElementById('bkEmail'),
+    phone: document.getElementById('bkPhone'),
+    date: document.getElementById('bkDate'),
+    time: document.getElementById('bkTime')
+  };
+  const submitBtn = document.getElementById('bkSubmit');
+  const touched = new Set();
+
+  const pad = n => String(n).padStart(2, '0');
+  const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  const nowHHMM = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+
+  function refreshMinimums() {
+    f.date.min = todayISO();
+    if (f.date.value === todayISO()) f.time.min = nowHHMM();
+    else f.time.removeAttribute('min');
+  }
+
+  const validators = {
+    name(v) {
+      v = v.trim();
+      if (!v) return 'Enter your full name.';
+      if (v.length < 2) return 'Name must be at least 2 characters.';
+      if (!/^[\p{L}\p{M}' .-]+$/u.test(v)) return 'Use letters, spaces, hyphens or apostrophes only.';
+      return '';
+    },
+    email(v) {
+      v = v.trim();
+      if (!v) return 'Enter your email address.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Enter an email in the format name@example.com.';
+      return '';
+    },
+    phone(v) {
+      v = v.trim();
+      if (!v) return 'Enter your phone number.';
+      if (!/^\+?[\d\s().-]+$/.test(v)) return 'Use digits, spaces, and + ( ) - only.';
+      const digits = v.replace(/\D/g, '');
+      if (digits.length < 7 || digits.length > 15) return 'Phone number should have 7 to 15 digits.';
+      return '';
+    },
+    date(v) {
+      if (!v) return 'Choose a date.';
+      if (v < todayISO()) return 'Choose today or a future date.';
+      return '';
+    },
+    time(v) {
+      if (!v) return 'Choose a time.';
+      if (f.date.value && f.date.value === todayISO() && v <= nowHHMM()) return 'That time has passed. Choose a later time today.';
+      return '';
+    }
+  };
+
+  function setError(key, msg) {
+    const input = f[key];
+    const field = input.closest('.field');
+    const err = document.getElementById(input.getAttribute('aria-describedby'));
+    field.classList.toggle('has-error', !!msg);
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    err.textContent = msg;
+  }
+
+  function validateField(key) {
+    const msg = validators[key](f[key].value);
+    setError(key, msg);
+    return !msg;
+  }
+
+  function clearErrors() {
+    touched.clear();
+    Object.keys(f).forEach(k => setError(k, ''));
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('is-loading');
+    submitBtn.querySelector('.btn__label').textContent = 'Submit booking';
+  }
+
+  Object.keys(f).forEach(key => {
+    f[key].addEventListener('blur', () => { touched.add(key); validateField(key); });
+    f[key].addEventListener('input', () => { if (touched.has(key)) validateField(key); });
+  });
+  f.date.addEventListener('change', () => {
+    refreshMinimums();
+    if (touched.has('time') || f.time.value) validateField('time');
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    refreshMinimums();
+    let firstInvalid = null;
+    Object.keys(f).forEach(key => {
+      touched.add(key);
+      if (!validateField(key) && !firstInvalid) firstInvalid = f[key];
+    });
+    if (firstInvalid) { firstInvalid.focus(); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitBtn.querySelector('.btn__label').textContent = 'Checking…';
+
+    // Demo only — no backend is connected. Replace with a real request when available.
+    setTimeout(() => {
+      const when = new Date(`${f.date.value}T${f.time.value}`);
+      const dateStr = when.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const timeStr = when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      Booking.showSuccess(`${f.name.value.trim()}, ${dateStr} at ${timeStr}`);
+    }, 900);
+  });
+
+  return { refreshMinimums, clearErrors };
+})();
+</script>
+</body>
+</html>
