@@ -153,6 +153,8 @@ p { margin: 0; }
 .logo:hover { opacity: .8; }
 .logo img { height: 44px; width: auto; } /* used once a real logo file is supplied */
 
+.site-header__inner { transition: height .35s var(--ease-out); }
+.site-header.is-scrolled .site-header__inner { height: calc(var(--header-h) - 14px); }
 .site-nav { display: flex; flex: 0 0 auto; align-items: center; gap: var(--space-6); margin-left: auto; }
 .btn__short { display: none; }
 
@@ -162,10 +164,23 @@ p { margin: 0; }
 main { position: relative; }
 .section { position: relative; isolation: isolate; overflow: hidden; }
 
+/* Dotted grid background with a soft gold glow — add .bg-dots to any section.
+   .bg-dots--left moves the glow to the opposite side. */
+.bg-dots {
+  --dot-color: rgba(219, 223, 232, .13);
+  --dot-gap: 22px;
+  --dot-glow: radial-gradient(55% 55% at 78% 30%, rgba(201, 171, 92, .08) 0%, rgba(32, 36, 45, 0) 100%);
+  background-image:
+    var(--dot-glow),
+    radial-gradient(circle at 1.5px 1.5px, var(--dot-color) 1.2px, transparent 1.3px);
+  background-size: 100% 100%, var(--dot-gap) var(--dot-gap);
+}
+.bg-dots--left { --dot-glow: radial-gradient(60% 60% at 15% 70%, rgba(201, 171, 92, .08) 0%, rgba(32, 36, 45, 0) 100%); }
+
 /* ---- 4.1 Hero / intro (reference image 1) ---- */
 .hero {
   padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
-  padding-bottom: max(4rem, calc(8 * var(--sv)));
+  padding-bottom: max(2.75rem, calc(5.3 * var(--sv)));
 }
 .hero::before { /* soft ambient light behind the signature */
   content: ""; position: absolute; z-index: -1; pointer-events: none;
@@ -184,17 +199,18 @@ main { position: relative; }
   padding: max(1.5rem, calc(2.6 * var(--sv))) calc(var(--side) + 5.6 * var(--sv)) 0;
   max-width: calc(var(--side) + 95 * var(--sv));
   font-size: max(1.05rem, calc(1.58 * var(--sv)));
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-soft);
   line-height: 1.3;
 }
 .hero__body p + p, .hero__body p + .services-block, .hero__body .services-block + p { margin-top: 1.3em; }
 .hero__body .dot-list { padding-left: 1.85em; }
+.hero__body > p, .hero__body > .services-block { max-width: 76ch; }
 
 /* ---- 4.2 & 4.3 Service sections (reference images 2 & 3) ---- */
-.service { padding-bottom: clamp(4rem, 6vw, 6rem); }
+.service { padding-bottom: clamp(2.75rem, 4vw, 4rem); }
 .service__head {
-  min-height: max(9rem, calc(22 * var(--sv)));
+  min-height: max(7rem, calc(17 * var(--sv)));
   display: flex; align-items: flex-end;
   padding: calc(var(--header-h) * .6) 0 max(1.5rem, calc(4.6 * var(--sv))) calc(var(--side) + 7.2 * var(--sv));
 }
@@ -205,7 +221,7 @@ main { position: relative; }
   border-top: 0;
   padding: max(1.75rem, calc(4.8 * var(--sv))) max(1.25rem, calc(4.8 * var(--sv))) max(2rem, calc(3.8 * var(--sv)));
   font-size: max(1rem, calc(1.33 * var(--sv)));
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-soft);
   line-height: 1.22;
   background: linear-gradient(180deg, rgba(255,255,255,.012), transparent 40%);
@@ -214,9 +230,12 @@ main { position: relative; }
 .service__box > p + p, .service__box > .dot-list + p { margin-top: 1.22em; }
 .service__box .dot-list { margin-top: .05em; padding-left: 1.6em; }
 .service__box .dot-list li + li { margin-top: .05em; }
+.service__box .box-title { color: #fff; font-weight: 500; }
+.service__box .box-label { color: var(--gold); font-weight: 500; letter-spacing: .01em; }
+.service__box .price { color: #fff; font-weight: 500; }
 
 /* ---- 4.4 Testimonials (reference image 4) ---- */
-.reviews { padding: calc(var(--header-h) * .4) 0 clamp(3rem, 5vw, 5rem); }
+.reviews { padding: calc(var(--header-h) * .4) 0 clamp(2rem, 3.3vw, 3.3rem); }
 .reviews__orb { /* slow-drifting warm light behind the frames */
   position: absolute; z-index: -1; pointer-events: none;
   width: clamp(320px, 46vw, 680px); aspect-ratio: 1; border-radius: 50%;
@@ -228,7 +247,7 @@ main { position: relative; }
   position: relative; width: 100%; max-width: 1600px; margin: 0 auto;
   container-type: inline-size;
 }
-.reviews__eyebrow, .reviews__sub { font-weight: 300; color: var(--text-soft); margin: 0; }
+.reviews__eyebrow, .reviews__sub { font-weight: 400; color: var(--text-soft); margin: 0; }
 .reviews__title { font-size: 11cqw; line-height: 1.1; }
 
 .quote {
@@ -273,8 +292,8 @@ blockquote { margin: 0; }
   .quote:last-child:nth-child(odd) { grid-column: 1 / -1; width: calc(50% - var(--space-6) / 2); justify-self: center; }
 }
 @media (max-width: 600px) {
-  .reviews__grid { grid-template-columns: 1fr; gap: var(--space-5); }
-  .quote { min-height: 170px; }
+  .reviews__grid { grid-template-columns: 1fr; gap: var(--space-4); }
+  .quote { min-height: 0; padding: var(--space-6) var(--space-5); }
   .quote:last-child:nth-child(odd) { width: auto; }
 }
 /* On desktop the wrapper elements step out of the way so each
@@ -282,20 +301,21 @@ blockquote { margin: 0; }
 @media (min-width: 1200px) { .reviews__head, .reviews__grid { display: contents; } }
 
 /* ---- 4.5 Contact (reference image 5) ---- */
-.contact { padding-bottom: clamp(5rem, 11vw, 10rem); }
+.contact { padding-bottom: clamp(3.5rem, 7.3vw, 6.75rem); }
 .contact__head {
-  min-height: max(10rem, calc(29.6 * var(--sv)));
+  min-height: max(8rem, calc(21 * var(--sv)));
   display: flex; align-items: center; justify-content: center;
   padding: calc(var(--header-h) * .5) 1rem clamp(1rem, 3vw, 3rem);
 }
 .contact__title { font-size: max(3rem, calc(10.7 * var(--sv))); line-height: 1.15; transform: translateX(1.5%); }
-.contact__body { text-align: center; padding-top: max(3rem, calc(6.6 * var(--sv))); }
+.contact__body { text-align: center; padding-top: max(2.25rem, calc(4.6 * var(--sv))); }
 .contact__heading {
   margin: 0 0 .9rem; font-weight: 400; color: #fff;
   font-size: max(1.35rem, calc(1.85 * var(--sv))); letter-spacing: .03em;
 }
-.contact__list { list-style: none; margin: 0; padding: 0; font-size: max(1.05rem, calc(1.3 * var(--sv))); font-weight: 300; color: var(--text-soft); line-height: 1.6; }
+.contact__list { list-style: none; margin: 0; padding: 0; font-size: max(1.05rem, calc(1.3 * var(--sv))); font-weight: 400; color: var(--text-soft); line-height: 1.6; }
 .contact__list a { text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .3s, color .3s; }
+.contact__list .contact__phone { display: inline-block; margin: .15em 0; font-size: 1.15em; font-weight: 500; color: var(--gold); border-bottom-color: rgba(201,171,92,.4); }
 .contact__list a:hover { color: var(--gold-3); border-color: var(--gold); }
 
 /* =========================================================
@@ -344,14 +364,14 @@ blockquote { margin: 0; }
   font-size: clamp(2.6rem, 7vw, 3.6rem); line-height: 1.2;
   margin: 0 3rem .25rem 0;
 }
-.modal__intro { margin: 0 0 var(--space-6); color: var(--text-muted); font-size: 1rem; font-weight: 300; max-width: 46ch; }
+.modal__intro { margin: 0 0 var(--space-6); color: var(--text-muted); font-size: 1rem; font-weight: 400; max-width: 46ch; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4) var(--space-4); }
 .field { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
 .field--full { grid-column: 1 / -1; }
 .field label { font-size: .95rem; font-weight: 500; color: var(--text); }
 .field .req { color: var(--gold); margin-left: 2px; }
-.field .optional { font-weight: 300; color: var(--text-muted); }
+.field .optional { font-weight: 400; color: var(--text-muted); }
 
 .field input, .field textarea {
   width: 100%; min-height: 48px;
@@ -391,7 +411,7 @@ blockquote { margin: 0; }
 }
 .booking-success__icon svg { width: 28px; height: 28px; }
 .booking-success h3 { font-family: var(--font-script); font-weight: 400; font-size: 3rem; line-height: 1.2; margin: 0 0 var(--space-3); color: #fff; }
-.booking-success p { margin: 0 auto var(--space-3); max-width: 42ch; color: var(--text-muted); font-weight: 300; }
+.booking-success p { margin: 0 auto var(--space-3); max-width: 42ch; color: var(--text-muted); font-weight: 400; }
 .booking-success .summary { color: var(--text); font-weight: 400; }
 .booking-success .btn { margin-top: var(--space-4); }
 
@@ -501,7 +521,7 @@ body.modal-open { overflow: hidden; }
   <!-- =======================================================
        SECTION 1 — Intro (reference image 1)
        ======================================================= -->
-  <section class="section hero" id="top" aria-labelledby="heroTitle">
+  <section class="section hero bg-dots" id="top" aria-labelledby="heroTitle">
     <h1 class="script hero__title" id="heroTitle" data-reveal="write"><span class="ink"><span>Bling</span> <span>Management</span></span></h1>
     <hr class="rule hero__rule" data-reveal style="--reveal-delay:.6s">
 
@@ -532,9 +552,9 @@ body.modal-open { overflow: hidden; }
     </div>
     <hr class="rule" data-reveal>
     <div class="service__box" data-reveal style="--reveal-delay:.25s">
-      <p>Asiakaspalvelu – kuukausipalvelu</p>
+      <p class="box-title">Asiakaspalvelu – kuukausipalvelu</p>
 
-      <p>Sisältö:</p>
+      <p class="box-label">Sisältö:</p>
       <ul class="dot-list">
         <li>Jatkuva keskusteluyhteys asukkaaseen puhelimitse ja OTA-kanavan kautta.</li>
         <li>Vieraiden kanssa kommunikointi 7 päivää viikossa lähtökohtaisesti klo 05.00–23.00, mutta hätä- ja poikkeustilanteissa 24/7.</li>
@@ -544,10 +564,10 @@ body.modal-open { overflow: hidden; }
         <li>Mahdollisuus neuvotella lisäpalveluista: tekstiilien tilaus, siivoojien koordinointi</li>
       </ul>
 
-      <p>Hinnoittelu:</p>
+      <p class="box-label">Hinnoittelu:</p>
       <ul class="dot-list">
-        <li>Perusasunto (1 kohde): 120 € / asunto / kk + hallinninointii liittyvät palvelumaksut</li>
-        <li>Useampi asunto (+3 kohde): 100 € / asunto / kk + hallinnointiin liittyvät palvelumaksut</li>
+        <li>Perusasunto (1 kohde): <span class="price">120 €</span> / asunto / kk + hallinninointii liittyvät palvelumaksut</li>
+        <li>Useampi asunto (+3 kohde): <span class="price">100 €</span> / asunto / kk + hallinnointiin liittyvät palvelumaksut</li>
       </ul>
     </div>
   </section>
@@ -561,9 +581,9 @@ body.modal-open { overflow: hidden; }
     </div>
     <hr class="rule" data-reveal>
     <div class="service__box" data-reveal style="--reveal-delay:.25s">
-      <p>Majoitusprofiilin optimointi – kertaluonteinen projekti</p>
+      <p class="box-title">Majoitusprofiilin optimointi – kertaluonteinen projekti</p>
 
-      <p>Sisältö:</p>
+      <p class="box-label">Sisältö:</p>
       <ul class="dot-list">
         <li>Ammattimainen ja myyvä ilmoituksen kuvaus (otsikko, kuvaustekstit, kuvien läpikäynti ja kuvatekstit)</li>
         <li>Automatisoitujen viestipohjien luominen (sisäänkirjautumisohjeet, aikaiset sisäänkirjautumispyynnöt, myöhäiset uloskirjautumispyynnöt, pysäköintiohjeet, tervetulo- ja kiitosviestit)</li>
@@ -572,7 +592,7 @@ body.modal-open { overflow: hidden; }
         <li>Muut valmiit viestipohjat tarpeen mukaan (muistutukset, lisäohjeet, sääntöviestit)</li>
       </ul>
 
-      <p>Hinnoittelu:</p>
+      <p class="box-label">Hinnoittelu:</p>
       <ul class="dot-list">
         <li>Perushinta: € / projekti</li>
         <li>Laajennettu versio (esim. 2+ asuntoa tai paljon viestipohjia): € / projekti</li>
@@ -583,7 +603,7 @@ body.modal-open { overflow: hidden; }
   <!-- =======================================================
        SECTION 4 — Palautteita / testimonials (reference image 4)
        ======================================================= -->
-  <section class="section reviews" id="palautteita" aria-labelledby="reviewsTitle">
+  <section class="section reviews bg-dots bg-dots--left" id="palautteita" aria-labelledby="reviewsTitle">
     <div class="reviews__orb" data-parallax="0.12" aria-hidden="true"></div>
 
     <div class="reviews__canvas">
@@ -625,7 +645,7 @@ body.modal-open { overflow: hidden; }
       <h2 class="contact__heading" id="contactHeading">YHTEISTIEDOT</h2>
       <ul class="contact__list">
         <li>Matilda Pohjola</li>
-        <li><a href="tel:+358440888162">+358 440 888 162</a></li>
+        <li><a class="contact__phone" href="tel:+358440888162" aria-label="Soita numeroon +358 440 888 162">+358 440 888 162</a></li>
         <li>Bling Management Oy</li>
       </ul>
     </div>
