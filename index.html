@@ -164,18 +164,17 @@ p { margin: 0; }
 main { position: relative; }
 .section { position: relative; isolation: isolate; overflow: hidden; }
 
-/* Dotted grid background with a soft gold glow — add .bg-dots to any section.
-   .bg-dots--left moves the glow to the opposite side. */
+/* Dotted grid background. Applied once on <main> so the grid runs
+   continuously across all sections instead of restarting at each one. */
 .bg-dots {
   --dot-color: rgba(219, 223, 232, .13);
   --dot-gap: 22px;
-  --dot-glow: radial-gradient(55% 55% at 78% 30%, rgba(201, 171, 92, .08) 0%, rgba(32, 36, 45, 0) 100%);
-  background-image:
-    var(--dot-glow),
-    radial-gradient(circle at 1.5px 1.5px, var(--dot-color) 1.2px, transparent 1.3px);
-  background-size: 100% 100%, var(--dot-gap) var(--dot-gap);
+  background-image: radial-gradient(circle at 1.5px 1.5px, var(--dot-color) 1.2px, transparent 1.3px);
+  background-size: var(--dot-gap) var(--dot-gap);
 }
-.bg-dots--left { --dot-glow: radial-gradient(60% 60% at 15% 70%, rgba(201, 171, 92, .08) 0%, rgba(32, 36, 45, 0) 100%); }
+/* Soft gold glow layered over the dots, per section */
+.glow { background-image: radial-gradient(55% 55% at 78% 30%, rgba(201, 171, 92, .08) 0%, rgba(32, 36, 45, 0) 100%); }
+.glow--left { background-image: radial-gradient(60% 60% at 15% 70%, rgba(201, 171, 92, .08) 0%, rgba(32, 36, 45, 0) 100%); }
 
 /* ---- 4.1 Hero / intro (reference image 1) ---- */
 .hero {
@@ -516,12 +515,12 @@ body.modal-open { overflow: hidden; }
   </div>
 </header>
 
-<main id="main">
+<main id="main" class="bg-dots">
 
   <!-- =======================================================
        SECTION 1 — Intro (reference image 1)
        ======================================================= -->
-  <section class="section hero bg-dots" id="top" aria-labelledby="heroTitle">
+  <section class="section hero glow" id="top" aria-labelledby="heroTitle">
     <h1 class="script hero__title" id="heroTitle" data-reveal="write"><span class="ink"><span>Bling</span> <span>Management</span></span></h1>
     <hr class="rule hero__rule" data-reveal style="--reveal-delay:.6s">
 
@@ -546,7 +545,7 @@ body.modal-open { overflow: hidden; }
   <!-- =======================================================
        SECTION 2 — Asiakaspalvelu (reference image 2)
        ======================================================= -->
-  <section class="section service" id="asiakaspalvelu" aria-labelledby="svcTitle1">
+  <section class="section service glow glow--left" id="asiakaspalvelu" aria-labelledby="svcTitle1">
     <div class="service__head">
       <h2 class="script service__title" id="svcTitle1" data-reveal="write"><span class="ink">Asiakaspalvelu</span></h2>
     </div>
@@ -575,7 +574,7 @@ body.modal-open { overflow: hidden; }
   <!-- =======================================================
        SECTION 3 — Profiilin optimointi (reference image 3)
        ======================================================= -->
-  <section class="section service service--profile" id="profiilin-optimointi" aria-labelledby="svcTitle2">
+  <section class="section service service--profile glow" id="profiilin-optimointi" aria-labelledby="svcTitle2">
     <div class="service__head">
       <h2 class="script service__title" id="svcTitle2" data-reveal="write"><span class="ink">Profiilin optimointi</span></h2>
     </div>
@@ -603,7 +602,7 @@ body.modal-open { overflow: hidden; }
   <!-- =======================================================
        SECTION 4 — Palautteita / testimonials (reference image 4)
        ======================================================= -->
-  <section class="section reviews bg-dots bg-dots--left" id="palautteita" aria-labelledby="reviewsTitle">
+  <section class="section reviews glow glow--left" id="palautteita" aria-labelledby="reviewsTitle">
     <div class="reviews__orb" data-parallax="0.12" aria-hidden="true"></div>
 
     <div class="reviews__canvas">
@@ -636,7 +635,7 @@ body.modal-open { overflow: hidden; }
   <!-- =======================================================
        SECTION 5 — Yhteystiedot / contact (reference image 5)
        ======================================================= -->
-  <section class="section contact" id="yhteystiedot" aria-labelledby="contactHeading">
+  <section class="section contact glow" id="yhteystiedot" aria-labelledby="contactHeading">
     <div class="contact__head">
       <p class="script contact__title" aria-hidden="true" data-reveal="write"><span class="ink">Bling Management</span></p>
     </div>
